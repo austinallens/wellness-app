@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp">
+
+    <!-- Day cell background -->
+    <View
+        android:id="@+id/dayBackground"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/calendar_day_background"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Day number -->
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        tools:text="15"
+        app:layout_constraintTop_toTopOf="@id/dayBackground"
+        app:layout_constraintBottom_toBottomOf="@id/dayBackground"
+        app:layout_constraintStart_toStartOf="@id/dayBackground"
+        app:layout_constraintEnd_toEndOf="@id/dayBackground" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
