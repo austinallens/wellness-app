@@ -44,8 +44,11 @@ class PlansListFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = WorkoutPlanAdapter(
             onEditClick = { plan ->
-                // TODO: Navigate to plan builder
-                Snackbar.make(binding.root, "Edit plan: ${plan.name}", Snackbar.LENGTH_SHORT).show()
+                // Navigate to Plan Builder
+                val intent = android.content.Intent(requireContext(), PlanBuilderActivity::class.java)
+                intent.putExtra("PLAN_ID", plan.id)
+                intent.putExtra("PLAN_NAME", plan.name)
+                startActivity(intent)
             },
             onActivateClick = { plan ->
                 togglePlanActivation(plan)

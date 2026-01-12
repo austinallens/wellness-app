@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.ko.wellness.data.database.AppDatabase
+import com.ko.wellness.data.entities.WorkoutExercise
 import com.ko.wellness.databinding.FragmentTodayBinding
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -24,7 +25,7 @@ class TodayFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentTodayBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -48,6 +49,9 @@ class TodayFragment : Fragment() {
         // Display Formatted Date
         binding.tvDate.text = getFormattedDate()
 
+        // Generate Workouts from active Plan
+        generateDailyWorkoutsFromPlan(today)
+
         // Observe Workouts for Today
         database.workoutExerciseDao().getWorkoutsForDate(today).observe(viewLifecycleOwner) { exercises ->
             // Convert Exercise to WorkoutItems with Headers
@@ -58,8 +62,83 @@ class TodayFragment : Fragment() {
             updateProgress(exercises)
         }
 
-        // TODO: Remove this after testing - adds sample data
-        addSampleDataIfEmpty(today)
+        database.workoutExerciseDao().getWorkoutsForDate(today).observe(viewLifecycleOwner) { exercises ->
+            val items = groupExercisesByCategory(exercises)
+            adapter.submitList(items)
+            updateProgress(exercises)
+
+            // Show/Hide Play Button
+            if (exercises.isNotEmpty()) {
+                binding.fabStartWorkout.visibility = View.VISIBLE
+                binding.fabStartWorkout.setOnClickListener {
+                    startWorkout(today)
+                }
+            } else {
+                binding.fabStartWorkout.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun startWorkout(date: String) {
+        val intent = android.content.Intent(requireContext(), WorkoutPlayerActivity::class.java)
+        intent.putExtra("WORKOUT_DATE", date)
+        startActivity(intent)
+    }
+
+    private fun generateDailyWorkoutsFromPlan(date: String) {
+        lifecycleScope.launch {
+            // Check if Workouts Already Exist for Today
+            val existingCount = database.workoutExerciseDao().getWorkoutCountForDate(date)
+            if (existingCount > 0) {
+                // Already Have Workouts for Today
+                return@launch
+            }
+
+            // Get Active Plan
+            val activePlan = database.workoutPlanDao().getActivePlan()
+            if (activePlan == null) {
+                // No Active PLan - Show Empty State
+                return@launch
+            }
+
+            // Get Today's Day of Week (Calendar.MONDAY = 2, etc.)
+            val calendar = Calendar.getInstance()
+            val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
+            // Get Exercises for this day from the Plan
+            val planExercises = database.planExerciseDao()
+                .getExercisesForPlanAndDay(activePlan.id, dayOfWeek)
+
+            if (planExercises.isEmpty()) {
+                // No Exercises Scheduled for Today
+                return@launch
+            }
+
+            // Convert PlanExercise to WorkoutExercise
+            val workoutExercises = planExercises.mapNotNull { planExercise ->
+                val template = database.exerciseTemplateDao()
+                    .getTemplateById(planExercise.exerciseTemplateId)
+
+                template?.let {
+                    WorkoutExercise(
+                        id = 0,
+                        date = date,
+                        name = template.name,
+                        category = template.category,
+                        sets = planExercise.sets,
+                        reps = planExercise.reps,
+                        duration = planExercise.duration,
+                        isCompleted = false,
+                        order = planExercise.order
+                    )
+                }
+            }
+
+            // Insert All Workout Exercises for Today
+            if (workoutExercises.isNotEmpty()) {
+                database.workoutExerciseDao().insert(*workoutExercises.toTypedArray())
+            }
+        }
     }
 
     private fun updateExerciseCompletion(exerciseId: Long, isCompleted: Boolean) {
@@ -68,24 +147,22 @@ class TodayFragment : Fragment() {
         }
     }
 
-    private fun updateProgress(exercise: List<com.ko.wellness.data.entities.WorkoutExercise>) {
+    private fun updateProgress(exercise: List<WorkoutExercise>) {
         val total = exercise.size
         val completed = exercise.count { it.isCompleted }
 
         if (total == 0) {
             binding.tvProgress.text = "No workouts scheduled for today"
             binding.progressBar.progress = 0
-            binding.progressBar.max = 100
         } else {
             val percentage = (completed * 100) / total
             binding.tvProgress.text = "$completed of $total completed ($percentage%)"
-            binding.progressBar.max = 100
             binding.progressBar.progress = percentage
         }
     }
 
     private fun groupExercisesByCategory(
-        exercises: List<com.ko.wellness.data.entities.WorkoutExercise>
+        exercises: List<WorkoutExercise>
     ): List<WorkoutItem> {
         val items = mutableListOf<WorkoutItem>()
 
@@ -115,65 +192,6 @@ class TodayFragment : Fragment() {
     private fun getFormattedDate(): String {
         val dateFormat = SimpleDateFormat("EEEE, MMMM d", Locale.getDefault())
         return dateFormat.format(Date())
-    }
-
-    private fun addSampleDataIfEmpty(date: String) {
-        lifecycleScope.launch {
-            val count = database.workoutExerciseDao().getWorkoutCountForDate(date)
-            if (count == 0) {
-                // Add Sample Exercises
-                database.workoutExerciseDao().insert(
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Jumping Jacks",
-                        category = "Warm-Up",
-                        sets = 1,
-                        duration = 60,
-                        order = 0
-                    ),
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Arm Circles",
-                        category = "Warm-Up",
-                        sets = 1,
-                        duration = 30,
-                        order = 1
-                    ),
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Push-ups",
-                        category = "Workout",
-                        sets = 3,
-                        reps = 10,
-                        order = 2
-                    ),
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Squats",
-                        category = "Workout",
-                        sets = 3,
-                        reps = 15,
-                        order = 3
-                    ),
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Plank",
-                        category = "Workout",
-                        sets = 3,
-                        duration = 30,
-                        order = 4
-                    ),
-                    com.ko.wellness.data.entities.WorkoutExercise(
-                        date = date,
-                        name = "Stretching",
-                        category = "Cooldown",
-                        sets = 1,
-                        duration = 300,
-                        order = 5
-                    )
-                )
-            }
-        }
     }
 
     override fun onDestroyView() {

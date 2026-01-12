@@ -20,6 +20,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.workouts.PlanBuilderActivity"
+            android:label="Plan Builder"
+            android:theme="@style/Theme.Wellness" />
+        <activity
+            android:name=".ui.workouts.WorkoutPlayerActivity"
+            android:label="Workout Player"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Wellness" />
     </application>
 
 </manifest>

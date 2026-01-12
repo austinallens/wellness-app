@@ -76,11 +76,11 @@ class ExerciseLibraryFragment : Fragment() {
     }
 
     private fun loadExercises() {
-        lifecycleScope.launch {
+        database.exerciseTemplateDao().getAllTemplatesLive().observe(viewLifecycleOwner) { allExercises ->
             val exercises = if (currentCategory == null) {
-                database.exerciseTemplateDao().getAllTemplates()
+                allExercises
             } else {
-                database.exerciseTemplateDao().getTemplatesByCategory(currentCategory!!)
+                allExercises.filter { it.category == currentCategory }
             }
 
             adapter.submitList(exercises)

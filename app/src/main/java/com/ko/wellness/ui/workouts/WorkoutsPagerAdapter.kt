@@ -10,7 +10,7 @@ class WorkoutsPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> TodayFragment()
-            1 -> ExerciseLibraryFragment()
+            1 -> PlansFragment()
             else -> throw IllegalArgumentException("Invalid position: $position")
         }
     }

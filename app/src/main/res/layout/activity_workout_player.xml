@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:keepScreenOn="true">
+
+    <!-- Close Button -->
+    <ImageButton
+        android:id="@+id/buttonClose"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Close workout"
+        android:src="@drawable/ic_close"
+        app:tint="#FFFFFF"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Progress Text - moved down to not overlap -->
+    <TextView
+        android:id="@+id/textProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Exercise 1 of 5"
+        android:textColor="#B3B3B3"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/buttonClose" />
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="8dp"
+        android:progressDrawable="@drawable/progress_bar_drawable"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textProgress" />
+
+    <!-- Category Badge -->
+    <TextView
+        android:id="@+id/textCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/category_badge_background"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:text="Warm-Up"
+        android:textColor="#BB86FC"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
+    <!-- Exercise Name -->
+    <TextView
+        android:id="@+id/textExerciseName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:text="Push-ups"
+        android:textColor="#FFFFFF"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textCategory" />
+
+    <!-- Set Info -->
+    <TextView
+        android:id="@+id/textSetInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Set 1 of 3"
+        android:textColor="#B3B3B3"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textExerciseName" />
+
+    <!-- Main Display Area (Timer or Rep Counter) -->
+    <FrameLayout
+        android:id="@+id/frameMainDisplay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/buttonPrevious"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textSetInfo">
+
+        <!-- Timer Display (for timed exercises) -->
+        <LinearLayout
+            android:id="@+id/layoutTimer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:30"
+                android:textColor="#BB86FC"
+                android:textSize="72sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textTimerLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="seconds remaining"
+                android:textColor="#B3B3B3"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <!-- Rep Counter Display (for rep exercises) -->
+        <LinearLayout
+            android:id="@+id/layoutRepCounter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textRepLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="reps completed"
+                android:textColor="#B3B3B3"
+                android:textSize="16sp" />
+
+            <!-- Rep Counter with +/- buttons -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonRepMinus"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:text="-"
+                    android:textColor="#BB86FC"
+                    android:textSize="24sp"
+                    app:strokeColor="#BB86FC" />
+
+                <EditText
+                    android:id="@+id/editRepCount"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:text="0"
+                    android:textColor="#BB86FC"
+                    android:textSize="48sp"
+                    android:textStyle="bold"
+                    android:background="@null" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/buttonRepPlus"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:text="+"
+                    android:textColor="#BB86FC"
+                    android:textSize="24sp"
+                    app:strokeColor="#BB86FC" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textRepTarget"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Target: 10 reps"
+                android:textColor="#B3B3B3"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/buttonRepsDone"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="#BB86FC"
+                android:paddingHorizontal="48dp"
+                android:text="Complete Set"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <!-- Rest Display -->
+        <LinearLayout
+            android:id="@+id/layoutRest"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="REST"
+                android:textColor="#4CAF50"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textRestTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="0:30"
+                android:textColor="#4CAF50"
+                android:textSize="72sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/buttonSkipRest"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Skip Rest"
+                android:textColor="#4CAF50"
+                app:strokeColor="#4CAF50" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Navigation Buttons -->
+    <Button
+        android:id="@+id/buttonPrevious"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="24dp"
+        android:text="Previous"
+        android:textColor="#BB86FC"
+        app:layout_constraintBottom_toTopOf="@id/buttonPlayPause"
+        app:layout_constraintEnd_toStartOf="@id/buttonNext"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeColor="#BB86FC" />
+
+    <Button
+        android:id="@+id/buttonNext"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="24dp"
+        android:text="Next"
+        android:textColor="#BB86FC"
+        app:layout_constraintBottom_toTopOf="@id/buttonPlayPause"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/buttonPrevious"
+        app:strokeColor="#BB86FC" />
+
+    <!-- Play/Pause Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonPlayPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:contentDescription="Play/Pause"
+        android:src="@android:drawable/ic_media_pause"
+        app:backgroundTint="#BB86FC"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="#FFFFFF" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
