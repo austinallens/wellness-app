@@ -27,7 +27,12 @@ class WorkoutPlayerActivity : AppCompatActivity() {
     private var remainingTime: Long = 0
     private var totalTime: Long = 0
 
-    private val REST_DURATION = 30000L // 30 Seconds
+    private var isProcessing = false
+
+    private val REST_DURATION = 30000L // 30 seconds
+
+    private var completedSetsForCurrentExercise = 0
+    private var allSetsCompletedProperly = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,9 +56,18 @@ class WorkoutPlayerActivity : AppCompatActivity() {
                     return@observe
                 }
 
-                // Only load once
                 if (exercises.isEmpty()) {
-                    exercises = workoutList.sortedBy { it.order }
+                    // Sort by Category Order First, then by Order within Category
+                    exercises = workoutList.sortedWith(
+                        compareBy<WorkoutExercise> { exercise ->
+                            when (exercise.category) {
+                                "Warm-Up" -> 0
+                                "Workout" -> 1
+                                "Cooldown" -> 2
+                                else -> 3
+                            }
+                        }.thenBy { it.order }
+                    )
                     startExercise()
                 }
             }
@@ -108,6 +122,12 @@ class WorkoutPlayerActivity : AppCompatActivity() {
         isResting = false
         isTimerRunning = false
 
+        // Reset Completion Tracking when Starting an Exercise
+        if (currentSet == 1) {
+            completedSetsForCurrentExercise = 0
+            allSetsCompletedProperly = true
+        }
+
         updateUI(exercise)
 
         if (exercise.duration != null) {
@@ -155,22 +175,73 @@ class WorkoutPlayerActivity : AppCompatActivity() {
     }
 
     private fun completeSet() {
+        if (isProcessing) return
+        isProcessing = true
+
+        // Validate Reps if it's a Rep-Based Exercise
+        val exercise = exercises[currentExerciseIndex]
+        if (exercise.reps != null) {
+            val enteredReps = binding.editRepCount.text.toString().toIntOrNull() ?: 0
+            val targetReps = exercise.reps
+
+            if (enteredReps < targetReps) {
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Incomplete Set")
+                    .setMessage("You've only completed $enteredReps of $targetReps reps. Are you sure you want to continue?")
+                    .setPositiveButton("Yes, Continue") { _, _ ->
+                        allSetsCompletedProperly = false
+                        proceedToNextSet()
+                    }
+                    .setNegativeButton("Go Back") { _, _ ->
+                        isProcessing = false
+                    }
+                    .setOnCancelListener {
+                        isProcessing = false
+                    }
+                    .show()
+                return
+            } else {
+                // Reps Met or Exceeded - this Set was Completed Properly
+                completedSetsForCurrentExercise++
+            }
+        } else {
+            // Timed Exercise - Always counts as Completed
+            completedSetsForCurrentExercise++
+        }
+
+        proceedToNextSet()
+    }
+
+    private fun proceedToNextSet() {
         timer?.cancel()
         isTimerRunning = false
+
+        if (currentExerciseIndex >= exercises.size) {
+            isProcessing = false
+            return
+        }
 
         val exercise = exercises[currentExerciseIndex]
 
         if (currentSet < exercise.sets) {
-            // More sets remaining - start rest
+            // More Sets Remaining - Start Rest
             currentSet++
             startRest()
         } else {
-            // Exercise complete - mark as completed and move to next exercise
-            markExerciseComplete(exercise)
+            // Exercise Complete - Mark as Complete and move to Next Exercise
+            if (allSetsCompletedProperly && completedSetsForCurrentExercise == exercise.sets) {
+                markExerciseComplete(exercise)
+            }
+
+            // Reset Counters for Next Exercise
+            completedSetsForCurrentExercise = 0
+            allSetsCompletedProperly = true
             currentSet = 1
             currentExerciseIndex++
             startExercise()
         }
+
+        binding.root.postDelayed({ isProcessing = false }, 300)
     }
 
     private fun markExerciseComplete(exercise: WorkoutExercise) {
@@ -187,15 +258,33 @@ class WorkoutPlayerActivity : AppCompatActivity() {
     }
 
     private fun previousSet() {
+        if (isProcessing) return
+        isProcessing = true
+
         timer?.cancel()
         isTimerRunning = false
 
         if (isResting) {
             // Go back to previous set of current exercise
             currentSet--
+            if (currentSet < 1) {
+                // If We were on set 1's rest, go to previous exercise
+                if (currentExerciseIndex > 0) {
+                    currentExerciseIndex--
+                    val prevExercise = exercises[currentExerciseIndex]
+                    currentSet = prevExercise.sets
+                    completedSetsForCurrentExercise = 0
+                    allSetsCompletedProperly = true
+                } else {
+                    currentSet = 1
+                }
+            }
             startExercise()
         } else if (currentSet > 1) {
             // Go to previous set
+            if (completedSetsForCurrentExercise > 0) {
+                completedSetsForCurrentExercise--
+            }
             currentSet--
             startExercise()
         } else if (currentExerciseIndex > 0) {
@@ -203,13 +292,25 @@ class WorkoutPlayerActivity : AppCompatActivity() {
             currentExerciseIndex--
             val prevExercise = exercises[currentExerciseIndex]
             currentSet = prevExercise.sets
+            completedSetsForCurrentExercise = 0
+            allSetsCompletedProperly = true
             startExercise()
         }
+
+        binding.root.postDelayed({ isProcessing = false }, 300)
     }
 
     private fun nextSet() {
+        if (isProcessing) return
+        isProcessing = true
+
         timer?.cancel()
         isTimerRunning = false
+
+        if (currentExerciseIndex >= exercises.size) {
+            isProcessing = false
+            return
+        }
 
         val exercise = exercises[currentExerciseIndex]
 
@@ -223,6 +324,9 @@ class WorkoutPlayerActivity : AppCompatActivity() {
             currentExerciseIndex++
             startExercise()
         }
+
+        // Reset Processing Flag after a Short Delay
+        binding.root.postDelayed({ isProcessing = false }, 300)
     }
 
     private fun togglePauseResume() {

@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Progress Text - moved down to not overlap -->
+    <!-- Progress Text -->
     <TextView
         android:id="@+id/textProgress"
         android:layout_width="wrap_content"
@@ -94,7 +94,7 @@
         android:id="@+id/frameMainDisplay"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/buttonPrevious"
+        app:layout_constraintBottom_toTopOf="@id/buttonPlayPause"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textSetInfo">
@@ -252,6 +252,20 @@
 
     </FrameLayout>
 
+    <!-- Play/Pause Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonPlayPause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Play/Pause"
+        android:src="@android:drawable/ic_media_pause"
+        app:backgroundTint="#BB86FC"
+        app:layout_constraintBottom_toTopOf="@id/buttonPrevious"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:tint="#FFFFFF" />
+
     <!-- Navigation Buttons -->
     <Button
         android:id="@+id/buttonPrevious"
@@ -260,10 +274,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="32dp"
         android:text="Previous"
         android:textColor="#BB86FC"
-        app:layout_constraintBottom_toTopOf="@id/buttonPlayPause"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/buttonNext"
         app:layout_constraintStart_toStartOf="parent"
         app:strokeColor="#BB86FC" />
@@ -275,26 +289,12 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="32dp"
         android:text="Next"
         android:textColor="#BB86FC"
-        app:layout_constraintBottom_toTopOf="@id/buttonPlayPause"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/buttonPrevious"
         app:strokeColor="#BB86FC" />
-
-    <!-- Play/Pause Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/buttonPlayPause"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:contentDescription="Play/Pause"
-        android:src="@android:drawable/ic_media_pause"
-        app:backgroundTint="#BB86FC"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:tint="#FFFFFF" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
